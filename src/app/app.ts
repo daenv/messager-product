@@ -1,41 +1,39 @@
-import helmet from 'helmet';
-import { Request, Response, NextFunction } from 'express';
-//import { getErrorMessage } from "./utils/error/errorMessage";
-const morgan = require('morgan');
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const app = express();
-const cookieParser = require('cookie-parser');
+require('dotenv').config();
 
-app.connect(require('./db/connection'));
-// use middleware
-app.use(helmet());
-app.use(morgan('combined'));
-app.use(
-   cors({
-      credentials: true,
-      origin: ['http://localhost:4200'],
-   })
-);
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookieParser());
-// routers
-app.use(require('./routes'));
+import express, { Request, Response } from 'express';
+import logger from 'morgan';
+import * as bodyParser from 'body-parser';
+import cors from 'cors';
 
-// Error Handling Middleware called                             
-app.use((req: Request, res: Response, next: NextFunction) => {
-   const error = new Error('Not found');
-   next(error);
-});
-// error handler middleware
-app.use((error: any, req: Request, res: Response, next: NextFunction) => {
-   res.status(error.status || 500).send({
-      error: {
-         status: error.status || 500,
-         //   message: getErrorMessage(error) || "Internal Server Error",
-      },
-   });
-});
-module.exports = app;
+/**
+ * Create and configure ExpressJS web server
+ */
+
+class App {
+   public express: express.Application;
+   constructor() {
+      this.express = express();
+      this.middleware();
+      this.routes();
+   }
+
+   private middleware(): void {
+      this.express.use(logger('dev'));
+      this.express.use(bodyParser.json());
+      this.express.use(bodyParser.urlencoded({ extended: false }));
+      this.express.use(cors({ origin: 'http://localhost:4200' }));
+   }
+
+   private routes(): void {
+      // This function will change when we start to add more API endpoints
+      let router = express.Router();
+      // placeholder route handler
+      router.get('/', (req: Request, res: Response) => {
+         res.json({
+            message: 'Hello World!',
+         });
+      });
+   }
+}
+
+export default new App().express;
