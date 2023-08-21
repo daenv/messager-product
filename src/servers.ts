@@ -2,7 +2,7 @@ import * as http from 'http';
 import debug from 'debug';
 
 import App from './app/app';
-const port = normalizePort(process.env.NODE_DOCKER_PORT || 8080);
+const port = normalizePort(process.env.NODE_DOCKER_PORT || 3031);
 App.set('port', port);
 const server = http.createServer(App);
 server.listen(port);

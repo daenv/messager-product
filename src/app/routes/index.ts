@@ -1,5 +1,6 @@
 import { Router } from 'express';
-const routes = Router();
-routes.use('/api/users', require('./users/user.router'));
+const IndexRoutes = Router();
+const userRouter = require('./users/user.router');
+IndexRoutes.use('/api/users', userRouter);
 
-module.exports = routes;
+export default IndexRoutes;

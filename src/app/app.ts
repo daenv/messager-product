@@ -4,7 +4,14 @@ import express, { Request, Response } from 'express';
 import logger from 'morgan';
 import * as bodyParser from 'body-parser';
 import cors from 'cors';
+import morgan from 'morgan';
+import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 
+/**
+ * Import routes
+ */
+import IndexRoutes from './routes/index';
 /**
  * Create and configure ExpressJS web server
  */
@@ -22,17 +29,14 @@ class App {
       this.express.use(bodyParser.json());
       this.express.use(bodyParser.urlencoded({ extended: false }));
       this.express.use(cors({ origin: 'http://localhost:4200' }));
+      this.express.use(morgan('dev'));
+      this.express.use(cookieParser());
+      this.express.use(helmet());
+      this.express.connect(require('./db/connection'));
    }
 
    private routes(): void {
-      // This function will change when we start to add more API endpoints
-      let router = express.Router();
-      // placeholder route handler
-      router.get('/', (req: Request, res: Response) => {
-         res.json({
-            message: 'Hello World!',
-         });
-      });
+      this.express.use(IndexRoutes);
    }
 }
 
