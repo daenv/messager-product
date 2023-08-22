@@ -1,21 +1,26 @@
+import { createPool } from 'mysql2/promise';
 require('dotenv').config();
 
-const mysql = require('mysql2');
 const util = require('util');
 const testMode: boolean = process.env.JEST_WORKER_ID !== undefined ? true : false;
-const DB_HOST: string | undefined = testMode
-   ? process.env.MYSQL_HOST_LOCAL
-   : process.env.MYSQL_HOST_DOCKER;
+const DB_HOST: string | undefined = testMode ? process.env.MYSQL_HOST_LOCAL : process.env.MYSQL_HOST_DOCKER;
 
-var pool = mysql.createPool({
-   host: DB_HOST ,
-   user: process.env.MYSQL_USER,
-   password: process.env.MYSQL_PASS ,
-   database: process.env.MYSQL_DB,
-   connectionLimit: 10,
-});
+export const connection = async () => {
+   const pool = createPool({
+      host: DB_HOST,
+      user: process.env.MYSQL_USER,
+      password: process.env.MYSQL_PASS,
+      database: process.env.MYSQL_DB,
+      connectionLimit: 10 || process.env.MYSQL_CONNECTION_LIMIT,
+   });
+  
+   // promisify for node async/await.
+   pool.query = util.promisify(pool.query);
+
+   return pool;
+};
 // ping db for common exception errors
-pool.getConnection((err: any, connection: any) => {
+/* pool.getConnection((err: any, connection: any) => {
    if (err) {
       if (err.code === 'PROTOCOL_CONNECTION_LOST') {
          console.error('Database connection was closed.');
@@ -30,9 +35,5 @@ pool.getConnection((err: any, connection: any) => {
 
    if (connection) connection.release();
    return;
-});
+}); */
 
-// promisify for node async/await.
-pool.query = util.promisify(pool.query);
-
-module.exports = pool;
