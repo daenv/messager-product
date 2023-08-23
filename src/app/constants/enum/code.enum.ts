@@ -1,4 +1,5 @@
 export enum Code {
+   DEFAULT = 0,
    CREATED = 201,
    SUCCESS = 200,
    FORBIDDEN = 204,

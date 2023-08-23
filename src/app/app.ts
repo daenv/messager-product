@@ -32,7 +32,7 @@ class App {
       this.express.use(morgan('dev'));
       this.express.use(cookieParser());
       this.express.use(helmet());
-      this.express.connect(require('./db/connection'));
+      this.express.connect(require('./configs/connections/connection'));
    }
 
    private routes(): void {
