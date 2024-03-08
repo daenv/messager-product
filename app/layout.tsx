@@ -20,11 +20,11 @@ export default function RootLayout({
    return (
       <html lang="en">
          <body>
-            {/* <AuthContext> */}
-            {/* <ToasterContext /> */}
-            {/* <ActiveStatus /> */}
-            {children}
-            {/* </AuthContext> */}
+            <AuthContext>
+               <ToasterContext />
+               {/* <ActiveStatus /> */}
+               {children}
+            </AuthContext>
          </body>
       </html>
    );
