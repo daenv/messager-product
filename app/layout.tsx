@@ -1,22 +1,31 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import AuthContext from './context/AuthContext';
+// import ActiveStatus from './components/ActiveStatus';
+import ToasterContext from './context/ToasterContext';
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "Zalo",
-  description: "Zalo Clone",
+   title: 'Zalo',
+   description: 'Zalo Clone',
 };
 
 export default function RootLayout({
-  children,
+   children,
 }: Readonly<{
-  children: React.ReactNode;
+   children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
-    </html>
-  );
+   return (
+      <html lang="en">
+         <body>
+            <AuthContext>
+               <ToasterContext />
+               {/* <ActiveStatus /> */}
+               {children}
+            </AuthContext>
+         </body>
+      </html>
+   );
 }
