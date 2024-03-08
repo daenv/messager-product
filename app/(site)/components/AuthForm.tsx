@@ -1,16 +1,29 @@
 'use client';
 import Input from '@/app/components/input/Input';
 import Button from '@/app/components/Button';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import { CiLock } from 'react-icons/ci';
 import AuthSocialButton from './AuthSocialButton';
 import { BsGithub, BsGoogle } from 'react-icons/bs';
+import { useRouter } from 'next/navigation';
+import { signIn, useSession } from 'next-auth/react';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
 type Variant = 'LOGIN' | 'REGISTER';
 const AuthForm = () => {
+   const session = useSession();
    const [variant, setVariant] = useState<Variant>('LOGIN');
+   const router = useRouter();
    const [IsLoading, setIsLoading] = useState(false);
+
+   //
+   useEffect(() => {
+      if (session?.status === 'authenticated') {
+         router.push('/conversations');
+      }
+   }, [session?.status, router]);
 
    const toggleVariant = useCallback(() => {
       if (variant === 'LOGIN') {
@@ -19,6 +32,49 @@ const AuthForm = () => {
          setVariant('LOGIN');
       }
    }, [variant]);
+
+   const onSubmit: SubmitHandler<FieldValues> = (data) => {
+      setIsLoading(true);
+
+      if (variant === 'REGISTER') {
+         axios
+            .post('/api/register', data)
+            .then(() =>
+               signIn('credentials', {
+                  ...data,
+                  redirect: false,
+               }),
+            )
+            .then((callback) => {
+               if (callback?.error) {
+                  toast.error('Invalid credentials!');
+               }
+
+               if (callback?.ok) {
+                  router.push('/conversations');
+               }
+            })
+            .catch(() => toast.error('Something went wrong!'))
+            .finally(() => setIsLoading(false));
+      }
+
+      if (variant === 'LOGIN') {
+         signIn('credentials', {
+            ...data,
+            redirect: false,
+         })
+            .then((callback) => {
+               if (callback?.error) {
+                  toast.error('Invalid credentials!');
+               }
+
+               if (callback?.ok) {
+                  router.push('/conversations');
+               }
+            })
+            .finally(() => setIsLoading(false));
+      }
+   };
 
    const {
       register,
@@ -37,7 +93,7 @@ const AuthForm = () => {
             <form
                className="space-y-3"
                onSubmit={() => {
-                  console.log('OnSubmit form');
+                  router.push('/conversations');
                }}
             >
                <div className="relative">
@@ -84,7 +140,14 @@ const AuthForm = () => {
                </div>
 
                <div>
-                  <Button disabled={IsLoading} fullWidth type="submit">
+                  <Button
+                     disabled={IsLoading}
+                     fullWidth
+                     type="submit"
+                     onClick={() => {
+                        router.push('/conversations');
+                     }}
+                  >
                      {variant === 'LOGIN' ? 'Sign in' : 'Register'}
                   </Button>
                </div>
