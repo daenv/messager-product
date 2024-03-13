@@ -2,7 +2,7 @@
 import useRoutes from '@/app/hooks/useRoutes';
 import DesktopItem from './DesktopItem';
 import Avatar from '../Avatar';
-import { User } from '@/app/users/data';
+
 import { useState } from 'react';
 import UserModal from '../modals/UserModal';
 
