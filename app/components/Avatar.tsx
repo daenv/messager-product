@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { User } from '../users/data';
+
 
 interface AvatarProps {
    user?: User;
