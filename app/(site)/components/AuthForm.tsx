@@ -9,15 +9,16 @@ import { BsGithub, BsGoogle } from 'react-icons/bs';
 import { useRouter } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
 import axios from 'axios';
+import { MdOutlineDriveFileRenameOutline } from 'react-icons/md';
+
 import toast from 'react-hot-toast';
 
 type Variant = 'LOGIN' | 'REGISTER';
 const AuthForm = () => {
    const session = useSession();
-   const [variant, setVariant] = useState<Variant>('LOGIN');
    const router = useRouter();
-   const [IsLoading, setIsLoading] = useState(false);
-
+   const [variant, setVariant] = useState<Variant>('LOGIN');
+   const [isLoading, setIsLoading] = useState(false);
    //
    useEffect(() => {
       if (session?.status === 'authenticated') {
@@ -32,6 +33,18 @@ const AuthForm = () => {
          setVariant('LOGIN');
       }
    }, [variant]);
+
+   const {
+      register,
+      handleSubmit,
+      formState: { errors },
+   } = useForm<FieldValues>({
+      defaultValues: {
+         name: '',
+         email: '',
+         password: '',
+      },
+   });
 
    const onSubmit: SubmitHandler<FieldValues> = (data) => {
       setIsLoading(true);
@@ -75,27 +88,26 @@ const AuthForm = () => {
             .finally(() => setIsLoading(false));
       }
    };
+   const socialAction = (action: string) => {
+      setIsLoading(true);
 
-   const {
-      register,
-      handleSubmit,
-      formState: { errors },
-   } = useForm<FieldValues>({
-      defaultValues: {
-         name: '',
-         email: '',
-         password: '',
-      },
-   });
+      signIn(action, { redirect: false })
+         .then((callback) => {
+            if (callback?.error) {
+               toast.error('Invalid credentials!');
+            }
+
+            if (callback?.ok) {
+               router.push('/conversations');
+            }
+         })
+         .finally(() => setIsLoading(false));
+   };
+
    return (
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
          <div className="bg-white px-2 py-8 shadow sm:round-lg sm:px-10">
-            <form
-               className="space-y-3"
-               onSubmit={() => {
-                  router.push('/conversations');
-               }}
-            >
+            <form className="space-y-3" onSubmit={handleSubmit(onSubmit)}>
                <div className="relative">
                   <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none mt-8">
                      <svg
@@ -110,7 +122,7 @@ const AuthForm = () => {
                      </svg>
                   </div>
                   <Input
-                     disabled={IsLoading}
+                     disabled={isLoading}
                      register={register}
                      errors={errors}
                      required
@@ -120,12 +132,29 @@ const AuthForm = () => {
                      placeholder="nguyen@gmail.com...."
                   />
                </div>
+               {variant === 'REGISTER' && (
+                  <div className="relative">
+                     <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none mt-8">
+                        <MdOutlineDriveFileRenameOutline />
+                     </div>
+                     <Input
+                        disabled={isLoading}
+                        register={register}
+                        errors={errors}
+                        required
+                        id="name"
+                        label="Name"
+                        type="text"
+                        placeholder="Enter your name..."
+                     />
+                  </div>
+               )}
                <div className="relative">
                   <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none mt-8">
                      <CiLock />
                   </div>
                   <Input
-                     disabled={IsLoading}
+                     disabled={isLoading}
                      register={register}
                      required
                      errors={errors}
@@ -140,14 +169,7 @@ const AuthForm = () => {
                </div>
 
                <div>
-                  <Button
-                     disabled={IsLoading}
-                     fullWidth
-                     type="submit"
-                     onClick={() => {
-                        router.push('/conversations');
-                     }}
-                  >
+                  <Button disabled={isLoading} fullWidth type="submit">
                      {variant === 'LOGIN' ? 'Sign in' : 'Register'}
                   </Button>
                </div>
